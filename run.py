@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
 
+from flash import process_flash
 
 class Window(QMainWindow):
     def __init__(self):
@@ -16,9 +17,6 @@ class Window(QMainWindow):
         self.setWindowIcon(QIcon('resources/icon.png'))
         # set the title
         self.setWindowTitle("PrivacySociety GSI Updater")
-
-        # setting  the geometry of window
-        # self.setGeometry(0, 0, 400, 300)
 
         # show all the widgets
         self.show()
@@ -39,22 +37,46 @@ class FormWidget(QWidget):
         self.url_text_edit.setFixedHeight(20)
         self.layout.addWidget(self.url_text_edit, 0, 1, Qt.AlignmentFlag.AlignRight)
 
+        self.variant_text_edit = QLabel("Variant")
+        self.layout.addWidget(self.variant_text_edit, 1, 0, Qt.AlignmentFlag.AlignLeft)
+
+        self.gsi_variant = QComboBox()
+        # self.gsi_variant.setEnabled(False)
+        self.gsi_variant.setFixedWidth(300)
+        self.gsi_variant.setFixedHeight(20)
+        # self.gsi_variant.setVisible(False)
+        self.gsi_variant.addItem("Titan Pocket")
+        self.gsi_variant.addItem("Jelly 2E")
+        self.gsi_variant.addItem("Atom L")
+        self.layout.addWidget(self.gsi_variant, 1, 1, Qt.AlignmentFlag.AlignRight)
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setFixedWidth(300)
-        self.layout.addWidget(self.progress_bar, 1, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
-
-        # verticalSpacer = QSpacerItem(40, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        # self.layout.addItem(verticalSpacer, 6, 0, Qt.AlignTop)
+        self.layout.addWidget(self.progress_bar, 2, 0, 1, 2, Qt.AlignmentFlag.AlignLeft)
 
         self.button1 = QPushButton("Flash")
-        self.layout.addWidget(self.button1, 1, 1, Qt.AlignmentFlag.AlignRight)
+        self.layout.addWidget(self.button1, 2, 1, Qt.AlignmentFlag.AlignRight)
 
         self.setLayout(self.layout)
 
 
+app = QApplication(sys.argv)
+window = Window()
+
+
+def flash_click():
+    # ui.start_progressbar(window.form_widget.progress_bar)
+    # flash.process_progressbar(window.form_widget.progress_bar)
+    url = window.form_widget.url_text_edit.toPlainText()
+    variant = window.form_widget.gsi_variant.currentText()
+    process_flash(url, variant, window.form_widget.progress_bar)
+    # window.form_widget.gsi_variant.setVisible(True)
+
+
+
+
 def main():
-    app = QApplication(sys.argv)
-    window = Window()
+    window.form_widget.button1.clicked.connect(lambda: flash_click())
 
     sys.exit(app.exec())
     return
