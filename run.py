@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
+import os
 
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import sys
+import threading
 
 from flash import process_flash
+
 
 class Window(QMainWindow):
     def __init__(self):
@@ -65,18 +68,32 @@ window = Window()
 
 
 def flash_click():
+    # window.form_widget.setEnabled(False)
     # ui.start_progressbar(window.form_widget.progress_bar)
     # flash.process_progressbar(window.form_widget.progress_bar)
     url = window.form_widget.url_text_edit.toPlainText()
     variant = window.form_widget.gsi_variant.currentText()
     process_flash(url, variant, window.form_widget.progress_bar)
     # window.form_widget.gsi_variant.setVisible(True)
+    # window.form_widget.setEnabled(True)
 
 
+def flash_click_event():
+    # ui.start_progressbar(window.form_widget.progress_bar)
+    window.form_widget.setEnabled(False)
+    window.form_widget.progress_bar.setValue(0)
+    x = threading.Thread(target=flash_click)
+    x.start()
+    while x.is_alive():
+        window.form_widget.setEnabled(False)
+    window.form_widget.progress_bar.setValue(100)
+    window.form_widget.setEnabled(True)
 
 
 def main():
-    window.form_widget.button1.clicked.connect(lambda: flash_click())
+    os.system("pip install PyQt5")
+
+    window.form_widget.button1.clicked.connect(lambda: flash_click_event())
 
     sys.exit(app.exec())
     return

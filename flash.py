@@ -3,24 +3,33 @@ import os
 import urllib.request
 import zipfile
 import json
+import stat
 
-from PyQt5.QtWidgets import QComboBox
+import lzma
 
 from enum import Enum
+
+import ui
+
 
 class OS(Enum):
     NotSet = ""
     Linux = "linux"
     Windows = "windows"
 
+
 os_type = OS.NotSet
 progress_bar = None
+filename = ""
+outfile = ""
+
 
 def get_variant_map():
     dict = {"Titan Pocket": "lineage_privacysociety_pocket",
             "Jelly 2E": "lineage_privacysociety_jelly2e",
-            "Atom L": "lineage_privacysociety_atoml" }
+            "Atom L": "lineage_privacysociety_atoml"}
     return dict
+
 
 def download_update(json_url, variant):
     here = os.path.dirname(os.path.realpath(__file__))
@@ -36,22 +45,38 @@ def download_update(json_url, variant):
             variant_url = i["url"];
     # print(variant_url)
 
+    global outfile
     outfile = here + "/resources/" + os.path.basename(variant_url)
     if not os.path.exists(outfile):
         urllib.request.urlretrieve(variant_url, outfile)
+
+    global progress_bar
+    progress_bar.setValue(30)
+
+    if not os.path.exists(outfile.strip(".xz")):
+        with lzma.open(outfile) as f, open(outfile.strip(".xz"), 'wb') as fout:
+            file_content = f.read()
+            fout.write(file_content)
+
+
 def process_flash(json_url, variant, progressbar):
+    global progress_bar
     progress_bar = progressbar
+    progressbar.setValue(10)
     # ui.applyProgress(10)
 
     prepare_adb_and_fastboot()
+    progressbar.setValue(20)
     download_update(json_url, variant)
-
-    download_new_gsi()
+    progressbar.setValue(40)
+    flash_gsi()
+    progressbar.setValue(50)
 
 
 def prepare_adb_and_fastboot():
     here = os.path.dirname(os.path.realpath(__file__))
     # ui.applyProgress(10)
+    global filename
     filename = ""
     if 'linux' in sys.platform:
         os_type = OS.Linux
@@ -64,6 +89,13 @@ def prepare_adb_and_fastboot():
 
     full_path = here + "/resources/" + filename
 
+    exe = full_path.rstrip(".zip") + "/platform-tools/adb"
+    st = os.stat(exe)
+    os.chmod(exe, st.st_mode | stat.S_IEXEC)
+    exe = full_path.rstrip(".zip") + "/platform-tools/fastboot"
+    st = os.stat(exe)
+    os.chmod(exe, st.st_mode | stat.S_IEXEC)
+
     # Download
     if not os.path.exists(full_path):
         urllib.request.urlretrieve(url, full_path)
@@ -74,14 +106,22 @@ def prepare_adb_and_fastboot():
             zip_ref.extractall(full_path.strip(".zip"))
 
 
-def download_new_gsi():
-
-   # progress_bar.setValue(10)
-    return
-
-def put_phone_in_fastboot_mode():
-    return
-
-
 def flash_gsi():
-    return
+    here = os.path.dirname(os.path.realpath(__file__))
+    global filename
+    global os_type
+    global outfile
+
+    full_path = here + "/resources/" + filename.rstrip(".zip") + "/platform-tools/"
+    command = "/adb reboot bootloader"
+
+    os.system(full_path + command)
+
+    progress_bar.setValue(70)
+    command = "/fastboot flash super " + outfile.rstrip(".xz")
+    os.system(full_path + command)
+
+    command = "/fastboot reboot"
+    os.system(full_path + command)
+
+    progress_bar.setValue(90)
