@@ -1,3 +1,4 @@
+import platform
 import sys
 import os
 import urllib.request
@@ -9,8 +10,6 @@ import lzma
 
 from enum import Enum
 
-import ui
-
 
 class OS(Enum):
     NotSet = ""
@@ -18,26 +17,40 @@ class OS(Enum):
     Windows = "windows"
 
 
+class DeviceType(Enum):
+    NotSet = ""
+    Pocket = "pocket"
+    Jelly2E = "jelly2e"
+    AtomL = "atoml"
+    Pixel5a = "pixel5a"
+
+
 os_type = OS.NotSet
 progress_bar = None
 filename = ""
 outfile = ""
+dev = DeviceType.NotSet
 
 
 def get_variant_map():
     dict = {"Titan Pocket": "lineage_privacysociety_pocket",
             "Jelly 2E": "lineage_privacysociety_jelly2e",
-            "Atom L": "lineage_privacysociety_atoml"}
+            "Atom L": "lineage_privacysociety_atoml",
+            "Pixel 5a": "lineage_privacysociety_pixel5a", }
     return dict
 
 
 def download_update(json_url, variant):
+    global dev
     here = os.path.dirname(os.path.realpath(__file__))
     json_contents = urllib.request.urlopen(json_url)
     data = json.load(json_contents)
     variants = data["variants"]
     # print(variant)
     variant_code = get_variant_map()[variant]
+    for enm in DeviceType:
+        if variant_code.split("_")[2] in enm.value:
+            dev = enm
     # print(variant_code)
     variant_url = "";
     for i in variants:
@@ -63,20 +76,24 @@ def process_flash(json_url, variant, progressbar):
     global progress_bar
     progress_bar = progressbar
     progressbar.setValue(10)
-    # ui.applyProgress(10)
 
     prepare_adb_and_fastboot()
     progressbar.setValue(20)
+
     download_update(json_url, variant)
-    progressbar.setValue(40)
-    flash_gsi()
     progressbar.setValue(50)
+
+    if not dev == DeviceType.Pixel5a:
+        flash_gsi()
+    else:
+        flash_lineage_package()
 
 
 def prepare_adb_and_fastboot():
     here = os.path.dirname(os.path.realpath(__file__))
-    # ui.applyProgress(10)
+
     global filename
+    global os_type
     filename = ""
     if 'linux' in sys.platform:
         os_type = OS.Linux
@@ -89,13 +106,6 @@ def prepare_adb_and_fastboot():
 
     full_path = here + "/resources/" + filename
 
-    exe = full_path.rstrip(".zip") + "/platform-tools/adb"
-    st = os.stat(exe)
-    os.chmod(exe, st.st_mode | stat.S_IEXEC)
-    exe = full_path.rstrip(".zip") + "/platform-tools/fastboot"
-    st = os.stat(exe)
-    os.chmod(exe, st.st_mode | stat.S_IEXEC)
-
     # Download
     if not os.path.exists(full_path):
         urllib.request.urlretrieve(url, full_path)
@@ -104,6 +114,17 @@ def prepare_adb_and_fastboot():
     if not os.path.exists(full_path.strip(".zip")):
         with zipfile.ZipFile(full_path, 'r') as zip_ref:
             zip_ref.extractall(full_path.strip(".zip"))
+
+    exe = full_path.rstrip(".zip") + "/platform-tools/adb"
+    st = os.stat(exe)
+    os.chmod(exe, st.st_mode | stat.S_IEXEC)
+    exe = full_path.rstrip(".zip") + "/platform-tools/fastboot"
+    st = os.stat(exe)
+    os.chmod(exe, st.st_mode | stat.S_IEXEC)
+
+
+def flash_lineage_package():
+    return
 
 
 def flash_gsi():

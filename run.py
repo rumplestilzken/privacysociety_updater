@@ -51,6 +51,7 @@ class FormWidget(QWidget):
         self.gsi_variant.addItem("Titan Pocket")
         self.gsi_variant.addItem("Jelly 2E")
         self.gsi_variant.addItem("Atom L")
+        self.gsi_variant.addItem("Pixel 5a")
         self.layout.addWidget(self.gsi_variant, 1, 1, Qt.AlignmentFlag.AlignRight)
 
         self.progress_bar = QProgressBar()
@@ -76,6 +77,10 @@ def flash_click():
     process_flash(url, variant, window.form_widget.progress_bar)
     # window.form_widget.gsi_variant.setVisible(True)
     # window.form_widget.setEnabled(True)
+    # msg = QMessageBox()
+    # msg.setWindowTitle("Flash Complete.")
+    # msg.setText("Flashing has completed. Your phone is rebooting into PrivacySociety GSI.")
+    # msg.exec_()
 
 
 def flash_click_event():
@@ -91,8 +96,6 @@ def flash_click_event():
 
 
 def main():
-    os.system("pip install PyQt5")
-
     window.form_widget.button1.clicked.connect(lambda: flash_click_event())
 
     sys.exit(app.exec())
