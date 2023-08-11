@@ -5,6 +5,7 @@ import urllib.request
 import zipfile
 import json
 import stat
+import tarfile
 
 import lzma
 
@@ -66,10 +67,16 @@ def download_update(json_url, variant):
     global progress_bar
     progress_bar.setValue(30)
 
-    if not os.path.exists(outfile.strip(".xz")):
+    if not os.path.exists(outfile.strip(".xz")) and ".xz" in outfile:
+        print("Extracting PrivacySociety GSI '" + outfile + "'")
         with lzma.open(outfile) as f, open(outfile.strip(".xz"), 'wb') as fout:
             file_content = f.read()
             fout.write(file_content)
+
+    if not os.path.exists(outfile.strip(".tar.gz") and ".tar.gz" in outfile):
+        print("Extracting PrivacySociety GSI '" + outfile + "'")
+        with tarfile.open(outfile, "r") as tf:
+            tf.extractall(path=here + "/resources/")
 
 
 def process_flash(json_url, variant, progressbar):
@@ -139,7 +146,7 @@ def flash_gsi():
     os.system(full_path + command)
 
     progress_bar.setValue(70)
-    command = "/fastboot flash super " + outfile.rstrip(".xz")
+    command = "/fastboot flash super " + outfile.rstrip(".xz").rstrip(".tar.gz")
     os.system(full_path + command)
 
     command = "/fastboot reboot"
