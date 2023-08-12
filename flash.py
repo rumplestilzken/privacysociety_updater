@@ -92,7 +92,7 @@ def prepare_resources():
             zip_ref.extractall(here + "/resources/" + fn.rstrip(".zip"))
 
         # Execute Permissions.
-        exe = here + "/resources/bin_x86_64/xz"
+        exe = here + "/resources/xz-5.2.9-windows/bin_x86_64/xz"
         st = os.stat(exe)
         os.chmod(exe, st.st_mode | stat.S_IEXEC)
 
@@ -160,7 +160,7 @@ def download_update(json_url, variant):
         #     file_content = f.read()
         #     fout.write(file_content)
         if os_type == OS.Windows:
-            os.system("/resources/bin_x86-64/xz -kd -T 0 " + outfile)
+            os.system("/resources/xz-5.2.9-windows/bin_x86-64/xz -kd -T 0 " + outfile)
         else:
             os.system("xz -kd -T 0 " + outfile)
 
