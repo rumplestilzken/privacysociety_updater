@@ -96,7 +96,7 @@ def prepare_resources():
         # st = os.stat(exe)
         # os.chmod(exe, st.st_mode | stat.S_IEXEC)
 
-        url = "https://github.com/rumplestilzken/privacysociety_updater/releases/download/resources/wget-1.11.4-1-bin" \
+        url = "https://github.com/rumplestilzken/privacysociety_updater/releases/download/resources/curl-8.2.1_5-win64-mingw" \
               ".zip"
         fn = os.path.basename(url)
 
