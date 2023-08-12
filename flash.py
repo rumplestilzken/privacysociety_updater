@@ -108,13 +108,13 @@ def prepare_resources():
         # exe = "/resources/wget-1.11.4-1-bin/bin/wget"
         # st = os.stat(exe)
         # os.chmod(exe, st.st_mode | stat.S_IEXEC)
-
-    exe = full_path.rstrip(".zip") + "/platform-tools/adb"
-    st = os.stat(exe)
-    os.chmod(exe, st.st_mode | stat.S_IEXEC)
-    exe = full_path.rstrip(".zip") + "/platform-tools/fastboot"
-    st = os.stat(exe)
-    os.chmod(exe, st.st_mode | stat.S_IEXEC)
+    else:
+        exe = full_path.rstrip(".zip") + "/platform-tools/adb"
+        st = os.stat(exe)
+        os.chmod(exe, st.st_mode | stat.S_IEXEC)
+        exe = full_path.rstrip(".zip") + "/platform-tools/fastboot"
+        st = os.stat(exe)
+        os.chmod(exe, st.st_mode | stat.S_IEXEC)
 
 
 def download_update(json_url, variant):
