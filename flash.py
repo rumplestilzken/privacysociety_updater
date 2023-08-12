@@ -160,7 +160,7 @@ def download_update(json_url, variant):
         #     file_content = f.read()
         #     fout.write(file_content)
         if os_type == OS.Windows:
-            os.system("resources/xz-5.2.9-windows/bin_x86-64/xz -kd -T 0 " + outfile)
+            os.system("cd resources & \\xz-5.2.9-windows\\bin_x86-64\\xz -kd -T 0 " + outfile)
         else:
             os.system("xz -kd -T 0 " + outfile)
 
