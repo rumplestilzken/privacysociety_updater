@@ -1,4 +1,3 @@
-import platform
 import sys
 import os
 import urllib.request
@@ -6,8 +5,6 @@ import zipfile
 import json
 import stat
 import tarfile
-
-import lzma
 
 from enum import Enum
 
@@ -41,50 +38,12 @@ def get_variant_map():
     return dict
 
 
-def download_update(json_url, variant):
-    global dev
-    here = os.path.dirname(os.path.realpath(__file__))
-    json_contents = urllib.request.urlopen(json_url)
-    data = json.load(json_contents)
-    variants = data["variants"]
-    # print(variant)
-    variant_code = get_variant_map()[variant]
-    for enm in DeviceType:
-        if variant_code.split("_")[2] in enm.value:
-            dev = enm
-    # print(variant_code)
-    variant_url = "";
-    for i in variants:
-        if variant_code == i["name"]:
-            variant_url = i["url"];
-    # print(variant_url)
-
-    global outfile
-    outfile = here + "/resources/" + os.path.basename(variant_url)
-    if not os.path.exists(outfile):
-        urllib.request.urlretrieve(variant_url, outfile)
-
-    global progress_bar
-    progress_bar.setValue(30)
-
-    if not os.path.exists(outfile.strip(".xz")) and ".xz" in outfile:
-        print("Extracting PrivacySociety GSI '" + outfile + "'")
-        with lzma.open(outfile) as f, open(outfile.strip(".xz"), 'wb') as fout:
-            file_content = f.read()
-            fout.write(file_content)
-
-    if not os.path.exists(outfile.strip(".tar.gz") and ".tar.gz" in outfile):
-        print("Extracting PrivacySociety GSI '" + outfile + "'")
-        with tarfile.open(outfile, "r") as tf:
-            tf.extractall(path=here + "/resources/")
-
-
 def process_flash(json_url, variant, progressbar):
     global progress_bar
     progress_bar = progressbar
     progressbar.setValue(10)
 
-    prepare_adb_and_fastboot()
+    prepare_resources()
     progressbar.setValue(20)
 
     download_update(json_url, variant)
@@ -96,7 +55,7 @@ def process_flash(json_url, variant, progressbar):
         flash_lineage_package()
 
 
-def prepare_adb_and_fastboot():
+def prepare_resources():
     here = os.path.dirname(os.path.realpath(__file__))
 
     global filename
@@ -122,12 +81,93 @@ def prepare_adb_and_fastboot():
         with zipfile.ZipFile(full_path, 'r') as zip_ref:
             zip_ref.extractall(full_path.strip(".zip"))
 
+    if os_type == OS.Windows:
+        url = "https://github.com/rumplestilzken/privacysociety_updater/releases/download/resources/xz-5.2.9-windows" \
+              ".zip"
+        fn = os.path.basename(url)
+
+        # Download and Unzip
+        urllib.request.urlretrieve(url, here + "/resources/" + fn)
+        with zipfile.ZipFile(here + "/resources/" + fn, 'r') as zip_ref:
+            zip_ref.extractall(here + "/resources/" + fn.rstrip(".zip"))
+
+        # Execute Permissions.
+        exe = here + "/resources/bin_x86_64/xz"
+        st = os.stat(exe)
+        os.chmod(exe, st.st_mode | stat.S_IEXEC)
+
+        url = "https://github.com/rumplestilzken/privacysociety_updater/releases/download/resources/wget-1.11.4-1-bin" \
+              ".zip"
+        fn = os.path.basename(url)
+
+        # Download and Unzip
+        urllib.request.urlretrieve(url, here + "/resources/" + fn)
+        with zipfile.ZipFile(here + "/resources/" + fn, 'r') as zip_ref:
+            zip_ref.extractall(here + "/resources/" + fn.rstrip(".zip"))
+
+        exe = here + "/resources/wget-1.11.4-1-bin/bin"
+        st = os.stat(exe)
+        os.chmod(exe, st.st_mode | stat.S_IEXEC)
+
     exe = full_path.rstrip(".zip") + "/platform-tools/adb"
     st = os.stat(exe)
     os.chmod(exe, st.st_mode | stat.S_IEXEC)
     exe = full_path.rstrip(".zip") + "/platform-tools/fastboot"
     st = os.stat(exe)
     os.chmod(exe, st.st_mode | stat.S_IEXEC)
+
+
+def download_update(json_url, variant):
+    global dev
+    global os_type
+
+    here = os.path.dirname(os.path.realpath(__file__))
+    json_contents = urllib.request.urlopen(json_url)
+    data = json.load(json_contents)
+    variants = data["variants"]
+    # print(variant)
+    variant_code = get_variant_map()[variant]
+    for enm in DeviceType:
+        if variant_code.split("_")[2] in enm.value:
+            dev = enm
+    # print(variant_code)
+    variant_url = "";
+    for i in variants:
+        if variant_code == i["name"]:
+            variant_url = i["url"];
+    # print(variant_url)
+
+    global outfile
+    outfile = here + "/resources/" + os.path.basename(variant_url)
+    if not os.path.exists(outfile):
+        # urllib.request.urlretrieve(variant_url, outfile)
+        # r = requests.get(variant_url, stream= True)
+        # with open(outfile, "wb") as file:
+        #     for chunk in r.iter_content(chunk_size=4096):
+        #         if chunk:
+        #             file.write(chunk)
+        if os_type == OS.Windows:
+            os.system("cd " + here + "/resources/; /resources/wget-1.11.4-bin/bin/wget " + variant_url)
+        else:
+            os.system("cd " + here + "/resources/; wget " + variant_url)
+
+    global progress_bar
+    progress_bar.setValue(30)
+
+    if not os.path.exists(outfile.strip(".xz")) and ".xz" in outfile:
+        print("Extracting PrivacySociety GSI '" + outfile + "'")
+        # with lzma.open(outfile) as f, open(outfile.strip(".xz"), 'wb') as fout:
+        #     file_content = f.read()
+        #     fout.write(file_content)
+        if os_type == OS.Windows:
+            os.system("/resources/bin_x86-64/xz -kd -T 0 " + outfile)
+        else:
+            os.system("xz -kd -T 0 " + outfile)
+
+    if not os.path.exists(outfile.rstrip(".tar.gz")) and ".tar.gz" in outfile:
+        print("Extracting PrivacySociety GSI '" + outfile + "'")
+        with tarfile.open(outfile, "r") as tf:
+            tf.extractall(path=here + "/resources/")
 
 
 def flash_lineage_package():
@@ -146,7 +186,7 @@ def flash_gsi():
     os.system(full_path + command)
 
     progress_bar.setValue(70)
-    command = "/fastboot flash super " + outfile.rstrip(".xz").rstrip(".tar.gz")
+    command = "/fastboot flash super " + outfile.replace(".tar.gz", "").replace(".xz", "")
     os.system(full_path + command)
 
     command = "/fastboot reboot"
