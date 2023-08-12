@@ -92,7 +92,7 @@ def prepare_resources():
             zip_ref.extractall(here + "/resources/" + fn.rstrip(".zip"))
 
         # Execute Permissions.
-        exe = here + "/resources/xz-5.2.9-windows/bin_x86_64/xz"
+        exe = here + "/resources/xz-5.2.9-windows/bin_x86-64/xz"
         st = os.stat(exe)
         os.chmod(exe, st.st_mode | stat.S_IEXEC)
 
