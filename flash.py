@@ -92,9 +92,9 @@ def prepare_resources():
             zip_ref.extractall(here + "/resources/" + fn.rstrip(".zip"))
 
         # Execute Permissions.
-        exe = here + "/resources/xz-5.2.9-windows/bin_x86-64/xz"
-        st = os.stat(exe)
-        os.chmod(exe, st.st_mode | stat.S_IEXEC)
+        # exe = "/resources/xz-5.2.9-windows/bin_x86-64/xz"
+        # st = os.stat(exe)
+        # os.chmod(exe, st.st_mode | stat.S_IEXEC)
 
         url = "https://github.com/rumplestilzken/privacysociety_updater/releases/download/resources/wget-1.11.4-1-bin" \
               ".zip"
@@ -105,9 +105,9 @@ def prepare_resources():
         with zipfile.ZipFile(here + "/resources/" + fn, 'r') as zip_ref:
             zip_ref.extractall(here + "/resources/" + fn.rstrip(".zip"))
 
-        exe = here + "/resources/wget-1.11.4-1-bin/bin"
-        st = os.stat(exe)
-        os.chmod(exe, st.st_mode | stat.S_IEXEC)
+        # exe = "/resources/wget-1.11.4-1-bin/bin/wget"
+        # st = os.stat(exe)
+        # os.chmod(exe, st.st_mode | stat.S_IEXEC)
 
     exe = full_path.rstrip(".zip") + "/platform-tools/adb"
     st = os.stat(exe)
