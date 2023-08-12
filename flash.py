@@ -147,7 +147,7 @@ def download_update(json_url, variant):
         #         if chunk:
         #             file.write(chunk)
         if os_type == OS.Windows:
-            os.system("cd " + here + "/resources/; wget-1.11.4-bin/bin/wget " + variant_url)
+            os.system("cd " + here + "/resources/; curl " + variant_url)
         else:
             os.system("cd " + here + "/resources/; wget " + variant_url)
 
