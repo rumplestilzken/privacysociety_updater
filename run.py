@@ -50,7 +50,7 @@ class FormWidget(QWidget):
         # self.gsi_variant.setVisible(False)
         self.gsi_variant.addItem("Titan Pocket")
         self.gsi_variant.addItem("Jelly 2E")
-        self.gsi_variant.addItem("Atom L")
+        # self.gsi_variant.addItem("Atom L")
         self.gsi_variant.addItem("Pixel 5a")
         self.layout.addWidget(self.gsi_variant, 1, 1, Qt.AlignmentFlag.AlignRight)
 
@@ -90,7 +90,8 @@ def flash_click_event():
     x = threading.Thread(target=flash_click)
     x.start()
     while x.is_alive():
-        window.form_widget.setEnabled(False)
+        # window.form_widget.setEnabled(False)
+        ""  # Do Nothing
     window.form_widget.progress_bar.setValue(100)
     window.form_widget.setEnabled(True)
 

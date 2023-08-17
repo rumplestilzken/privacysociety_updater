@@ -50,9 +50,9 @@ def process_flash(json_url, variant, progressbar):
     progressbar.setValue(50)
 
     if not dev == DeviceType.Pixel5a:
-        flash_gsi()
+        flash_gsi("system_a")
     else:
-        flash_lineage_package()
+        flash_gsi("super")
 
 
 def prepare_resources():
@@ -147,7 +147,8 @@ def download_update(json_url, variant):
         #         if chunk:
         #             file.write(chunk)
         if os_type == OS.Windows:
-            os.system("cd resources/ & curl-8.2.1_5-win64-mingw\curl-8.2.1_5-win64-mingw\\bin\curl " + variant_url + " --output " + outfile)
+            os.system(
+                "cd resources/ & curl-8.2.1_5-win64-mingw\curl-8.2.1_5-win64-mingw\\bin\curl " + variant_url + " --output " + outfile)
         else:
             os.system("cd " + here + "/resources/; wget " + variant_url)
 
@@ -170,11 +171,7 @@ def download_update(json_url, variant):
             tf.extractall(path=here + "/resources/")
 
 
-def flash_lineage_package():
-    return
-
-
-def flash_gsi():
+def flash_gsi(partition_name):
     here = os.path.dirname(os.path.realpath(__file__))
     global filename
     global os_type
@@ -186,7 +183,7 @@ def flash_gsi():
     os.system(full_path + command)
 
     progress_bar.setValue(70)
-    command = "/fastboot flash super " + outfile.replace(".tar.gz", "").replace(".xz", "")
+    command = "/fastboot flash " + partition_name + " " + outfile.replace(".tar.gz", "").replace(".xz", "")
     os.system(full_path + command)
 
     command = "/fastboot reboot"
