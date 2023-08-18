@@ -180,6 +180,9 @@ def flash_gsi(partition_name):
     full_path = here + "/resources/" + filename.rstrip(".zip") + "/platform-tools/"
     command = "/adb reboot bootloader"
 
+    if "system" in partition_name:
+        command = "/adb reboot fastboot"
+
     os.system(full_path + command)
 
     progress_bar.setValue(70)
