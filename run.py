@@ -9,6 +9,7 @@ import threading
 
 from flash import process_flash
 
+x = None
 
 class Window(QMainWindow):
     def __init__(self):
@@ -84,11 +85,18 @@ def flash_click():
 
 
 def flash_click_event():
+    global x
     # ui.start_progressbar(window.form_widget.progress_bar)
     window.form_widget.setEnabled(False)
     window.form_widget.progress_bar.setValue(0)
     x = threading.Thread(target=flash_click)
     x.start()
+    y = threading.Thread(target=process_finished)
+    y.start()
+
+
+def process_finished():
+    global x
     while x.is_alive():
         # window.form_widget.setEnabled(False)
         ""  # Do Nothing
