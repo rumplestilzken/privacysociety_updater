@@ -40,6 +40,7 @@ def get_variant_map():
 
 def process_flash(json_url, variant, progressbar):
     global progress_bar
+    global dev
     progress_bar = progressbar
     progressbar.setValue(10)
 
@@ -130,7 +131,9 @@ def download_update(json_url, variant):
     for enm in DeviceType:
         if variant_code.split("_")[2] in enm.value:
             dev = enm
-    # print(variant_code)
+
+    # print(dev.value)
+
     variant_url = "";
     for i in variants:
         if variant_code == i["name"]:
