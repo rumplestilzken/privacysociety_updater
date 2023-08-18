@@ -50,7 +50,7 @@ def process_flash(json_url, variant, progressbar):
     download_update(json_url, variant)
     progressbar.setValue(50)
 
-    if not dev == DeviceType.Pixel5a:
+    if dev == DeviceType.Pixel5a:
         flash_gsi("system_a")
     else:
         flash_gsi("super")
